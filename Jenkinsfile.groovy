@@ -11,7 +11,6 @@ node {
   IMAGE_BASE = "${GITLAB_INNERSOURCE_REGISTRY}/devops/images"
   FROM_IMAGE = "${IMAGE_BASE}/usgs/centos"
   IMAGE_NAME = "usgs/nginx"
-  IMAGE_VERSION = params.IMAGE_VERSION
 
   try {
     stage('Initialize') {
@@ -27,6 +26,13 @@ node {
           returnStdout: true,
           script: "git rev-parse HEAD"
         )
+      }
+
+      // Determine image tag to use
+      if (SCM_VARS.GIT_BRANCH != 'origin/master') {
+        IMAGE_VERSION = SCM_VARS.GIT_BRANCH.split('/').last().replace(' ', '_')
+      } else {
+        IMAGE_VERSION = 'latest'
       }
     }
 

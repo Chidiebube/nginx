@@ -1,6 +1,9 @@
 ARG FROM_IMAGE='usgs/centos'
 FROM $FROM_IMAGE
 
+LABEL maintainer="Eric Martinez <emartinez@usgs.gov>" \
+      dockerfile_version="1.0.0"
+
 
 RUN yum install -y epel-release && \
     yum install -y nginx && \
