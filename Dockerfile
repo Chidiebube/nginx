@@ -37,11 +37,9 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
 COPY ./html/ /usr/share/nginx/html
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+EXPOSE 8443
 STOPSIGNAL SIGQUIT
-
-# CMD ["nginx", "-g", "daemon off;"]
 
 USER usgs-user
 CMD [ "/docker-entrypoint.sh" ]
