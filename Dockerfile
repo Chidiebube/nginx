@@ -36,6 +36,14 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
 
 COPY ./html/ /usr/share/nginx/html
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY healthcheck.sh /healthcheck.sh
+
+HEALTHCHECK \
+        --interval=15s \
+        --timeout=5s \
+        --start-period=1m \
+        --retries=2 \
+    CMD /healthcheck.sh
 
 EXPOSE 8080
 EXPOSE 8443
