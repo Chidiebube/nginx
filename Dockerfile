@@ -9,9 +9,8 @@ RUN yum install -y epel-release && \
     yum install -y nginx && \
     yum clean all && \
     rm -rf /etc/nginx /usr/share/nginx/html && \
-    mkdir -p /etc/nginx /usr/share/nginx/html
-
-RUN chown -R usgs-user \
+    mkdir -p /etc/nginx /usr/share/nginx/html \
+    chown -R usgs-user \
         /var/log/nginx \
         /var/lib/nginx \
         /var/run /run
