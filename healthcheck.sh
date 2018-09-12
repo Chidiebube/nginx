@@ -8,6 +8,7 @@ ps $(cat /var/run/nginx.pid) > /dev/null 2>&1;
 status=$(curl \
   -s -o /tmp/healthcheck.html \
   -w "%{http_code}" \
+  --header "User-Agent: healthcheck" \
   http://localhost:8080${BASE_HREF}/healthcheck.html \
 );
 
@@ -25,6 +26,7 @@ fi
 status=$(curl \
   -s -o /tmp/healthcheck.html \
   -w "%{http_code}" \
+  --header "User-Agent: healthcheck" \
   http://localhost:8080${BASE_HREF}/bad_request.html \
 );
 
