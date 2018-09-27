@@ -9,10 +9,12 @@ RUN yum install -y epel-release && \
     yum install -y nginx && \
     yum clean all && \
     rm -rf /etc/nginx /usr/share/nginx/html && \
-    mkdir -p /etc/nginx /usr/share/nginx/html
+    mkdir -p /etc/nginx /usr/share/nginx/html && \
+    chown -R usgs-user \
+        /var/log/nginx \
+        /var/lib/nginx \
+        /var/run /run
 
-
-COPY ./html/ /usr/share/nginx/html
 COPY ./conf/ /etc/nginx/
 
 # Create a self-signed certificate so the build doesn't blow up by default.
@@ -31,9 +33,20 @@ RUN openssl \
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
+COPY ./html/ /usr/share/nginx/html
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY healthcheck.sh /healthcheck.sh
 
-EXPOSE 80
-EXPOSE 443
-STOPSIGNAL SIGTERM
+HEALTHCHECK \
+        --interval=15s \
+        --timeout=5s \
+        --start-period=1m \
+        --retries=2 \
+    CMD /healthcheck.sh
 
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 8080
+EXPOSE 8443
+STOPSIGNAL SIGQUIT
+
+USER usgs-user
+CMD [ "/docker-entrypoint.sh" ]

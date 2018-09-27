@@ -33,7 +33,7 @@ deployment.
 
 ### SSL
 
-The image configures NGINX to listen on both port 80 (HTTP) as well as 443
+The image configures NGINX to listen on both port 8080 (HTTP) as well as 8443
 (HTTPS). One may expose either or both of these ports as necessary for the
 target deployment using the `-p` switch when starting the container. No effort
 is made to redirect all HTTP traffic to HTTPS, however this could be
@@ -87,8 +87,8 @@ a container. Some specific switches of interest are documented below.
 ```
 -p HOST_PORT:CONTAINER_PORT
 ```
-Within the container, the NGINX server is configured to listen on both port 80
-and 443 (for HTTP and HTTPS respectively). An administrator may choose to
+Within the container, the NGINX server is configured to listen on both port 8080
+and 8443 (for HTTP and HTTPS respectively). An administrator may choose to
 expose either or both of these ports to the host container system.
 
 #### Mounts
@@ -103,17 +103,16 @@ may include exposing local static files to serve as the NGINX `root` directory.
 
 ### Examples
 
-Run an NGINX server in a container. Expose container ports 80 and 443 as host
-ports 8080 and 8443 respectively. Use the host `/etc/pki/nginx` directory as
-the container `/etc/nginx/ssl` directory (SSL certificates should already
-exist in the host directory).
+Run an NGINX server in a container. Expose container ports 8080 and 8443. Use
+the host `/etc/pki/nginx` directory as the container `/etc/nginx/ssl` directory
+(SSL certificates should already exist in the host directory).
 
 ```
 $ docker run \
   --name example-nginx \
   -v /etc/pki/nginx:/etc/nginx/ssl \
-  -p 8443:443 \
-  -p 8080:80 \
+  -p 8443:8443 \
+  -p 8080:8080 \
   usgs/nginx:latest
 ```
 
