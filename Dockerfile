@@ -18,11 +18,20 @@ RUN yum install -y epel-release && \
         /var/run /run
 
 COPY ./conf/ /etc/nginx/
+COPY ./html/ /usr/share/nginx/html
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+COPY ./healthcheck.sh /healthcheck.sh
 
 # Create a self-signed certificate so the build doesn't blow up by default.
 # If actually using SSL, a user will likely want to provide actual certificate
 # files for the target deployment.
-RUN openssl \
+RUN chown -R usgs-user \
+      /usr/share/nginx \
+      /etc/nginx \
+      /var/log/nginx \
+      /var/lib/nginx \
+      /var/run /run && \
+    openssl \
       req \
       -x509 \
       -nodes \
@@ -30,14 +39,9 @@ RUN openssl \
       -keyout /etc/nginx/ssl/server.key \
       -out /etc/nginx/ssl/server.crt \
       -days 365 \
-      -subj '/C=XX/ST=Example/L=Example/O=Company Name/OU=Org/CN=localhost'
-
-RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+      -subj '/C=XX/ST=Example/L=Example/O=Company Name/OU=Org/CN=localhost' && \
+    ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
-
-COPY ./html/ /usr/share/nginx/html
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-COPY healthcheck.sh /healthcheck.sh
 
 HEALTHCHECK \
         --interval=15s \
