@@ -11,6 +11,8 @@ RUN yum install -y epel-release && \
     rm -rf /etc/nginx /usr/share/nginx/html && \
     mkdir -p /etc/nginx /usr/share/nginx/html && \
     chown -R usgs-user \
+        /usr/share/nginx \
+        /etc/nginx \
         /var/log/nginx \
         /var/lib/nginx \
         /var/run /run
