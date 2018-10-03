@@ -33,7 +33,7 @@ status=$(curl \
 changes=$(diff /tmp/healthcheck.html /usr/share/nginx/html/404.html | wc -l);
 rm -f /tmp/healthcheck.html;
 
-if [[ $status -ne 404 || changes -ne 0 ]]; then
+if [[ $status -ne 404 || $changes -ne 0 ]]; then
   echo 'Error check failed.';
   exit 1;
 fi
