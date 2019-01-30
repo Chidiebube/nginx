@@ -1,61 +1,44 @@
-#!/usr/bin/env grooy
+#!/usr/bin/env groovy
 
 node {
+  def CONTAINER_BASE = null
   def FROM_IMAGE = null
-  def IMAGE_BASE = null
-  def IMAGE_NAME = null
-  def IMAGE_VERSION = null
-  def NODE_VERSION = null
-  def SCM_VARS = null
+  def INTERNAL_IMAGE_NAME = null
+  def PUBLIC_IMAGE_NAME = null
 
-  IMAGE_BASE = "${GITLAB_INNERSOURCE_REGISTRY}/devops/images"
-  FROM_IMAGE = "${IMAGE_BASE}/usgs/centos"
-  IMAGE_NAME = "usgs/nginx"
+  CONTAINER_BASE = "${GITLAB_INNERSOURCE_REGISTRY}/devops/images"
+  FROM_IMAGE = "${CONTAINER_BASE}/${params.FROM_IMAGE}"
+
+  INTERNAL_IMAGE_NAME = "${CONTAINER_BASE}/${params.IMAGE_NAME}"
+  PUBLIC_IMAGE_NAME = "${params.IMAGE_NAME}"
 
   try {
     stage('Initialize') {
       cleanWs()
 
-      SCM_VARS = checkout scm
+      checkout scm
 
       if (params.GIT_BRANCH != '') {
         sh "git checkout --detach ${params.GIT_BRANCH}"
-
-        SCM_VARS.GIT_BRANCH = params.GIT_BRANCH
-        SCM_VARS.GIT_COMMIT = sh(
-          returnStdout: true,
-          script: "git rev-parse HEAD"
-        )
-      }
-
-      // Determine image tag to use
-      if (SCM_VARS.GIT_BRANCH != 'origin/master') {
-        IMAGE_VERSION = SCM_VARS.GIT_BRANCH.split('/').last().replace(' ', '_')
-      } else {
-        IMAGE_VERSION = 'latest'
       }
     }
 
     stage('Build') {
       ansiColor('xterm') {
-        // Tag for internal registry
+        // Build tag for internal registry
         sh """
           docker build \
             --build-arg FROM_IMAGE=${FROM_IMAGE} \
-            -t ${IMAGE_BASE}/${IMAGE_NAME}:${IMAGE_VERSION} .
+            -t ${INTERNAL_IMAGE_NAME} .
         """
 
-        // Tag for default public Docker Hub
+        // Re-tag for default public Docker Hub
         sh """
           docker tag \
-            ${IMAGE_BASE}/${IMAGE_NAME}:${IMAGE_VERSION} \
-            ${IMAGE_NAME}:${IMAGE_VERSION}
+            ${INTERNAL_IMAGE_NAME} \
+            ${PUBLIC_IMAGE_NAME}
         """
       }
-    }
-
-    stage('Scan') {
-      echo 'TODO :: Implement security scanning.'
     }
 
     stage('Publish') {
@@ -64,13 +47,13 @@ node {
         'innersource-hazdev-cicd'
       ) {
         ansiColor('xterm') {
-          sh "docker push ${IMAGE_BASE}/${IMAGE_NAME}:${IMAGE_VERSION}"
+          sh "docker push ${INTERNAL_IMAGE_NAME}"
         }
       }
 
       docker.withRegistry('', 'usgs-docker-hub-credentials') {
         ansiColor('xterm') {
-          sh "docker push ${IMAGE_NAME}:${IMAGE_VERSION}"
+          sh "docker push ${PUBLIC_IMAGE_NAME}"
         }
       }
     }

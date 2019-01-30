@@ -1,4 +1,4 @@
-ARG FROM_IMAGE='usgs/centos'
+ARG FROM_IMAGE='usgs/centos:latest'
 FROM $FROM_IMAGE
 
 LABEL maintainer="Eric Martinez <emartinez@usgs.gov>" \
