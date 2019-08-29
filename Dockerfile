@@ -5,8 +5,9 @@ LABEL maintainer="Eric Martinez <emartinez@usgs.gov>" \
       dockerfile_version="1.0.0"
 
 
-RUN yum install -y epel-release && \
-    yum install -y nginx && \
+COPY ./nginx.repo /etc/yum.repos.d/nginx.repo
+
+RUN yum install -y nginx && \
     yum clean all && \
     rm -rf /etc/nginx /usr/share/nginx/html && \
     mkdir -p /etc/nginx /usr/share/nginx/html && \
@@ -16,8 +17,9 @@ RUN yum install -y epel-release && \
         /startup-hooks \
         /usr/share/nginx \
         /var/log/nginx \
-        /var/lib/nginx \
-        /var/run /run
+        /var/cache/nginx \
+        /var/run \
+        /run
 
 COPY ./conf/ /etc/nginx/
 COPY ./html/ /usr/share/nginx/html
@@ -27,13 +29,7 @@ COPY ./healthcheck.sh /healthcheck.sh
 # Create a self-signed certificate so the build doesn't blow up by default.
 # If actually using SSL, a user will likely want to provide actual certificate
 # files for the target deployment.
-RUN chown -R usgs-user \
-      /usr/share/nginx \
-      /etc/nginx \
-      /var/log/nginx \
-      /var/lib/nginx \
-      /var/run /run && \
-    openssl \
+RUN openssl \
       req \
       -x509 \
       -nodes \
